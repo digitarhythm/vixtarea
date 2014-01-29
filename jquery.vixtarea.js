@@ -8,7 +8,7 @@
 			method: undefined
         }, options);
 
-		var permitKeyCode = [186, 191, 65, 79, 68, 73, 88, 85, 82, 90, 72, 74, 75, 76, 89, 71, 82, 52, 54, 80];
+		var permitKeyCode = [186, 191, 65, 79, 68, 73, 88, 85, 82, 90, 72, 74, 75, 76, 89, 71, 82, 52, 54, 80, 77, 222];
 
 		var MAXUNDO = 256 + 1;
 
@@ -21,6 +21,7 @@
 		var prevKey = 0;
 		var yankbuffer = "";
 		var horizontal = 0;
+		var memoryline = [];
 
 		this.css("font-size", options.size);
 		this.css("line-height", options.size);
@@ -28,6 +29,7 @@
 		this.css("color", options.color);
 		this.css("background-color", options.backgroundColor);
 
+		// keyup ######################################################################################################
 		this.keyup(function(e) {
 			if (prevKey == 17 && e.keyCode == 17) {
 				prevKey = 0;
@@ -36,14 +38,21 @@
 			}
 			//console.log("prevKey="+prevKey+", keyup:"+e.keyCode);
 		});
+
+		// keydown ######################################################################################################
 		this.keydown(function(e) {
 			var elm = e.target;
 			//console.log("keydown="+e.keyCode);
 			switch (mode) {
 				case "view":
 					permit = permitKeyCode.indexOf(e.keyCode);
-					if (permit == -1) {
+					if (permit == -1 && modifyCode != 109 && modifyCode != 222) {
+						//console.log("preventDefault:"+e.keyCode);
 						e.preventDefault();
+					}
+
+					if (e.keyCode == 222 || e.keyCode == 77) {
+						modifyCode = e.keyCode;
 					}
 
 					if (prevKey == 17 && (e.keyCode != 82)) {
@@ -52,7 +61,6 @@
 					} else {
 						prevKey = e.keyCode;
 					}
-
 					break;
 
 				// 編集モード ##############################################################
@@ -89,9 +97,9 @@
 						undobuffer[undopoint] = elm.value;
 						var val = elm.value;
 						var pos = elm.selectionStart;
-						ch = val.substr(pos, 1);
+						ch = val.substr(pos - 1, 1);
 						code = ch.charCodeAt(0);
-						if (code == 10) {
+						if (code != 10) {
 							pos--;
 							elm.setSelectionRange(pos, pos);
 						}
@@ -100,6 +108,8 @@
 				mode = "view";
 			}
 		});
+	
+		// keypress ######################################################################################################
 		this.keypress(function(e) {
 			//console.log("keypress="+e.keyCode);
 			var elm = e.target;
@@ -107,6 +117,28 @@
 				case "view":
 					e.preventDefault();
 					var pos = elm.selectionStart;
+					// 行記憶
+					if (modifyCode == 109 && e.keyCode >= 97 && e.keyCode <= 122) {
+						tl = getLineText(this);
+						memoryline[e.keyCode] = {pos: pos - tl.currLineText.length, line: tl.currLine};
+						modifyCode = 0;
+						e.keyCode = 0;
+					}
+					// 行復帰
+					if (modifyCode == 222 && e.keyCode >= 97 && e.keyCode <= 122) {
+						if (memoryline[e.keyCode] != undefined) {
+							linenum = memoryline[e.keyCode].line - 5;
+							if (linenum < 0) {
+								linenum = 0;
+							}
+							jump = memoryline[e.keyCode].pos;
+							elm.setSelectionRange(jump, jump);
+							currpos = linenum * parseFloat(jQuery(this).css("line-height"));
+							jQuery(this).scrollTop(currpos);
+							modifyCode = 0;
+							e.keyCode = 0;
+						}
+					}
 					switch (e.keyCode) {
 						// エディター操作 ##################################################
 
@@ -115,7 +147,6 @@
 							var tl = getLineText(this);
 							horizontal = tl.currLineText.length;
 							var val = elm.value;
-							var pos = elm.selectionStart;
 							ch = val.substr(pos - 1, 1);
 							code = ch.charCodeAt(0);
 							if (code != 10) {
@@ -127,7 +158,6 @@
 						case 106: // j
 							var tl = getLineText(this);
 							if (tl.nextLineText != undefined) {
-								var pos = elm.selectionStart;
 								var move = pos - tl.currLineText.length + tl.currLineTextAll.length + 1;
 								if (horizontal < tl.nextLineText.length) {
 									move += horizontal;
@@ -147,7 +177,6 @@
 						case 107: // k
 							var tl = getLineText(this);
 							if (tl.prevLineText != undefined) {
-								var pos = elm.selectionStart;
 								var move = pos - tl.currLineText.length - tl.prevLineText.length - 1;
 								if (horizontal < tl.prevLineText.length) {
 									move += horizontal;
@@ -169,7 +198,6 @@
 							var tl = getLineText(this);
 							horizontal = tl.currLineText.length;
 							var val = elm.value;
-							var pos = elm.selectionStart;
 							ch1 = val.substr(pos, 1);
 							ch2 = val.substr(pos + 1, 1);
 							code1 = ch1.charCodeAt(0);
@@ -185,6 +213,10 @@
 							modifyCode = 0;
 							break;
 
+						case 109: // m
+							modifyCode = e.keyCode;
+							break;
+
 						// 編集操作 #########################################################
 
 						case 105: // i
@@ -194,7 +226,6 @@
 
 						case 97: // a
 							mode = "edit";
-							var pos = elm.selectionStart;
 							elm.setSelectionRange(pos+1, pos+1);
 							modifyCode = 0;
 							break;
@@ -202,7 +233,6 @@
 						case 111: // o
 							mode = "edit";
 							var tl = getLineText(this);
-							var pos = elm.selectionStart;
 							var nl = pos - tl.currLineText.length + tl.currLineTextAll.length + 1;
 							var val = elm.value;
 							elm.value = val.substr(0, nl) + '\n' + val.substr(nl, val.length);
@@ -213,7 +243,6 @@
 						case 79: // O
 							mode = "edit";
 							var tl = getLineText(this);
-							var pos = elm.selectionStart;
 							var nl = pos - tl.currLineText.length;
 							var val = elm.value;
 							elm.value = val.substr(0, nl) + '\n' + val.substr(nl, val.length);
@@ -247,7 +276,6 @@
 									}
 								}
 								var tl = getLineText(this);
-								var pos = elm.selectionStart;
 								var nl = pos - tl.currLineText.length;
 								var nl2 = pos - tl.currLineText.length + tl.currLineTextAll.length + 1;
 								var val = elm.value;
@@ -275,7 +303,6 @@
 							}
 							var tl = getLineText(this);
 							var val = elm.value;
-							var pos = elm.selectionStart;
 							var nl = pos - tl.currLineText.length + tl.currLineTextAll.length + 1;
 							elm.value = val.substr(0, nl) + yankbuffer + val.substr(nl, val.length);
 							elm.setSelectionRange(nl, nl);
@@ -297,7 +324,6 @@
 								}
 							}
 							var val = elm.value;
-							var pos = elm.selectionStart;
 							elm.value = val.substr(0, pos) + yankbuffer + val.substr(pos, val.length);
 							elm.setSelectionRange(pos, pos);
 							undobuffer[undopoint] = elm.value
@@ -317,7 +343,6 @@
 								}
 							}
 							var val = elm.value;
-							var pos = elm.selectionStart;
 							elm.value = val.substr(0, pos) + val.substr(pos + 1, val.length);
 							elm.setSelectionRange(pos, pos);
 							undobuffer[undopoint] = elm.value;
@@ -341,7 +366,6 @@
 
 						case 117: // u
 							if (undopoint != undotop) {
-								var pos = elm.selectionStart;
 								if (--undopoint < 0) {
 									undopoint = MAXUNDO - 1;
 								}
@@ -360,7 +384,6 @@
 
 						case 18: // ctrl+r
 							if (undopoint != undonew) {
-								var pos = elm.selectionStart;
 								if (++undopoint == MAXUNDO) {
 									undopoint = 0;
 								}
@@ -372,7 +395,6 @@
 
 						case 36: // shift+4
 							tl = getLineText(this);
-							var pos = elm.selectionStart;
 							var nl = pos + tl.currLineTextAll.length - tl.currLineText.length;
 							elm.setSelectionRange(nl, nl);
 							modifyCode = 0;
@@ -380,7 +402,6 @@
 
 						case 94: // shift+6
 							tl = getLineText(this);
-							var pos = elm.selectionStart;
 							var nl = pos - tl.currLineText.length;
 							elm.setSelectionRange(nl, nl);
 							modifyCode = 0;
@@ -394,13 +415,16 @@
 					e.preventDefault();
 					break;
 			}
-			var tl = getLineText(this);
-			var currLine = tl.currLine - 5;
-			if (currLine < 0) {
-				currLine = 0;
+
+			if (e.keyCode != 0) {
+				var tl = getLineText(this);
+				var currLine = tl.currLine - 5;
+				if (currLine < 0) {
+					currLine = 0;
+				}
+				currpos = currLine * parseFloat(jQuery(this).css("line-height"));
+				jQuery(this).scrollTop(currpos);
 			}
-			pos = currLine * parseFloat(jQuery(this).css("line-height"));
-			jQuery(this).scrollTop(pos);
 		});
 		return this;
 	}
