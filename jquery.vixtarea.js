@@ -42,12 +42,12 @@
 		// keydown ######################################################################################################
 		this.keydown(function(e) {
 			var elm = e.target;
-			console.log("keydown="+e.keyCode);
+			//console.log("keydown="+e.keyCode);
 			switch (mode) {
 				case "view":
 					permit = permitKeyCode.indexOf(e.keyCode);
 					if (permit == -1 && modifyCode != 109 && modifyCode != 222) {
-						console.log("preventDefault:"+e.keyCode);
+						//console.log("preventDefault:"+e.keyCode);
 						e.preventDefault();
 					}
 
@@ -78,7 +78,7 @@
 				case "command":
 					break;
 			}
-			console.log("prevKey="+prevKey);
+			//console.log("prevKey="+prevKey);
 			if ((e.keyCode == 27 || e.keyCode == 192) && (mode == "edit" || mode == "command") && prevKey != 16) {
 				modifyCode = 0;
 				switch (mode) {
@@ -113,14 +113,12 @@
 	
 		// keypress ######################################################################################################
 		this.keypress(function(e) {
-			console.log("keypress="+e.keyCode);
+			//console.log("keypress="+e.keyCode);
 			var elm = e.target;
 			switch (mode) {
 				case "edit":
-					console.log("edit");
 					switch (e.keyCode) {
 						case 126: // ~
-							console.log("~");
 							break;
 					}
 					break;
@@ -236,7 +234,14 @@
 
 						case 97: // a
 							mode = "edit";
-							elm.setSelectionRange(pos+1, pos+1);
+							var val = elm.value;
+							ch = val.substr(pos, 1);
+							code = ch.charCodeAt(0);
+							addpos = pos;
+							if (code != 10) {
+								addpos++;
+							}
+							elm.setSelectionRange(addpos, addpos);
 							modifyCode = 0;
 							break;
 
