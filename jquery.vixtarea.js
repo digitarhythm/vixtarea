@@ -324,8 +324,10 @@
 								}
 							}
 							var val = elm.value;
-							elm.value = val.substr(0, pos) + yankbuffer + val.substr(pos, val.length);
-							elm.setSelectionRange(pos, pos);
+							var tl = getLineText(this);
+							toppos = pos - tl.currLineText.length;
+							elm.value = val.substr(0, toppos) + yankbuffer + val.substr(toppos, val.length);
+							elm.setSelectionRange(toppos, toppos);
 							undobuffer[undopoint] = elm.value
 							modifyCode = 0;
 							break;
