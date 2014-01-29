@@ -8,7 +8,7 @@
 			method: undefined
         }, options);
 
-		var permitKeyCode = [186, 191, 65, 79, 68, 73, 88, 85, 82, 90, 72, 74, 75, 76, 89, 71, 82, 52, 54, 80, 77, 222];
+		var permitKeyCode = [16, 186, 191, 65, 79, 68, 73, 88, 85, 82, 90, 72, 74, 75, 76, 89, 71, 82, 52, 54, 80, 77, 222, 192];
 
 		var MAXUNDO = 256 + 1;
 
@@ -42,12 +42,12 @@
 		// keydown ######################################################################################################
 		this.keydown(function(e) {
 			var elm = e.target;
-			//console.log("keydown="+e.keyCode);
+			console.log("keydown="+e.keyCode);
 			switch (mode) {
 				case "view":
 					permit = permitKeyCode.indexOf(e.keyCode);
 					if (permit == -1 && modifyCode != 109 && modifyCode != 222) {
-						//console.log("preventDefault:"+e.keyCode);
+						console.log("preventDefault:"+e.keyCode);
 						e.preventDefault();
 					}
 
@@ -66,7 +66,6 @@
 				// 編集モード ##############################################################
 				case "edit":
 					if (e.keyCode === 9) { // TAB
-						//console.log("tab");
 						e.preventDefault();
 						var val = elm.value;
 						var pos = elm.selectionStart;
@@ -79,7 +78,8 @@
 				case "command":
 					break;
 			}
-			if (e.keyCode == 27 && (mode == "edit" || mode == "command")) {
+			console.log("prevKey="+prevKey);
+			if ((e.keyCode == 27 || e.keyCode == 192) && (mode == "edit" || mode == "command") && prevKey != 16) {
 				modifyCode = 0;
 				switch (mode) {
 					case "edit":
@@ -106,19 +106,29 @@
 						break;
 				}
 				mode = "view";
+			} else {
+				prevKey = e.keyCode;
 			}
 		});
 	
 		// keypress ######################################################################################################
 		this.keypress(function(e) {
-			//console.log("keypress="+e.keyCode);
+			console.log("keypress="+e.keyCode);
 			var elm = e.target;
 			switch (mode) {
+				case "edit":
+					console.log("edit");
+					switch (e.keyCode) {
+						case 126: // ~
+							console.log("~");
+							break;
+					}
+					break;
 				case "view":
 					e.preventDefault();
 					var pos = elm.selectionStart;
 					// 行記憶
-					if (modifyCode == 109 && e.keyCode >= 97 && e.keyCode <= 122) {
+					if (modifyCode == 109 && e.keyCode >= 96 && e.keyCode <= 122) {
 						tl = getLineText(this);
 						memoryline[e.keyCode] = {pos: pos - tl.currLineText.length, line: tl.currLine};
 						modifyCode = 0;
@@ -408,7 +418,7 @@
 							elm.setSelectionRange(nl, nl);
 							modifyCode = 0;
 							break;
-							
+
 					}
 					break;
 
