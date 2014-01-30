@@ -181,6 +181,7 @@
 		this.keypress(function(e) {
 			//console.log("keypress="+e.keyCode);
 			var elm = e.target;
+			var pos = elm.selectionStart;
 			var tl = getLineText(this);
 			switch (mode) {
 				case "edit":
@@ -191,7 +192,6 @@
 					break;
 				case "view":
 					e.preventDefault();
-					var pos = elm.selectionStart;
 					// 行記憶
 					if (modifyCode == 109 && e.keyCode >= 96 && e.keyCode <= 122) {
 						tl = getLineText(this);
@@ -277,6 +277,42 @@
 							modifyCode = 0;
 							break;
 
+						case 72: // ctrl+h
+							var jump = pos - tl.currLineText.length;
+							var loop = startLine + topmargin - 1;
+							for (i = tl.currLine - 1; i > loop; i--) {
+								jump -= (tl.allLines[i].length + 1);
+							}
+							elm.setSelectionRange(jump, jump);
+							modifyCode = 0;
+							break;
+
+						case 76: // ctrl+l
+							var jump = pos - tl.currLineText.length;
+							var loop = startLine + (vline - 1) - bottommargin;
+							for (i = tl.currLine; i < loop; i++) {
+								jump += (tl.allLines[i].length + 1);
+							}
+							elm.setSelectionRange(jump, jump);
+							modifyCode = 0;
+							break;
+
+						case 77: // ctrl+m
+							var jump = pos - tl.currLineText.length;
+							var loop = startLine + parseInt(vline / 2);
+							if (loop > tl.currLine) {
+								for (i = tl.currLine; i < loop; i++) {
+									jump += (tl.allLines[i].length + 1);
+								}
+							} else {
+								for (i = tl.currLine - 1; i > loop; i--) {
+									jump -= (tl.allLines[i].length + 1);
+								}
+							}
+							elm.setSelectionRange(jump, jump);
+							modifyCode = 0;
+							break;
+
 						case 58: // :
 							mode = "command";
 							modifyCode = 0;
@@ -284,6 +320,36 @@
 
 						case 109: // m
 							modifyCode = e.keyCode;
+							break;
+
+						case 36: // shift+4
+							tl = getLineText(this);
+							var nl = pos + tl.currLineTextAll.length - tl.currLineText.length;
+							elm.setSelectionRange(nl, nl);
+							modifyCode = 0;
+							break;
+
+						case 94: // shift+6
+							tl = getLineText(this);
+							var nl = pos - tl.currLineText.length;
+							elm.setSelectionRange(nl, nl);
+							modifyCode = 0;
+							break;
+
+						case 103: // g
+							if (modifyCode == 103) {
+								modifyCode = 0;
+								elm.setSelectionRange(0, 0);
+								startLine = 0;
+							} else {
+								modifyCode = 103;
+							}
+							break;
+
+						case 71: // shift+g
+							pos = elm.value.length;
+							elm.setSelectionRange(pos, pos);
+							modifyCode = 0;
 							break;
 
 						// 編集操作 #########################################################
@@ -443,22 +509,6 @@
 							modifyCode = 0;
 							break;
 
-						case 103: // g
-							if (modifyCode == 103) {
-								modifyCode = 0;
-								elm.setSelectionRange(0, 0);
-								startLine = 0;
-							} else {
-								modifyCode = 103;
-							}
-							break;
-
-						case 71: // shift+g
-							pos = elm.value.length;
-							elm.setSelectionRange(pos, pos);
-							modifyCode = 0;
-							break;
-
 						case 117: // u
 							if (undopoint != undotop) {
 								if (--undopoint < 0) {
@@ -486,20 +536,6 @@
 								elm.setSelectionRange(pos, pos);
 							}
 							prevKey = 17;
-							modifyCode = 0;
-							break;
-
-						case 36: // shift+4
-							tl = getLineText(this);
-							var nl = pos + tl.currLineTextAll.length - tl.currLineText.length;
-							elm.setSelectionRange(nl, nl);
-							modifyCode = 0;
-							break;
-
-						case 94: // shift+6
-							tl = getLineText(this);
-							var nl = pos - tl.currLineText.length;
-							elm.setSelectionRange(nl, nl);
 							modifyCode = 0;
 							break;
 
