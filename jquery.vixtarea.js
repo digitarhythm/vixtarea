@@ -1,3 +1,7 @@
+//######################################################################################################################
+// vi key bind on textarea for jQuery
+// 2014.01.30 coded by Kow Sakazaki
+//######################################################################################################################
 // 2キー処理ではないキーの各処理の最後にmodifyCode=0を入れておくこと。
 (function($) {
 	$.fn.vixtarea = function(options){
@@ -574,6 +578,26 @@
 							var val = elm.value;
 							elm.value = val.substr(0, pos) + val.substr(pos + 1, val.length);
 							elm.setSelectionRange(pos, pos);
+							undobuffer[undopoint] = elm.value;
+							modifyCode = 0;
+							break;
+
+						case 74: // J
+							undopoint++;
+							if (undopoint == MAXUNDO) {
+								undopoint = 0;
+							}
+							undonew = undopoint;
+							if (undopoint == undotop) {
+								undotop++;
+								if (undotop == MAXUNDO) {
+									undotop = 0;
+								}
+							}
+							var val = elm.value;
+							var lineend = pos - tl.currLineText.length + tl.currLineTextAll.length;
+							elm.value = val.substr(0, lineend) + ' ' + val.substr(lineend + 1, val.length);
+							elm.setSelectionRange(lineend, lineend);
 							undobuffer[undopoint] = elm.value;
 							modifyCode = 0;
 							break;
