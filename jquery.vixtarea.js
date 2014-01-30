@@ -24,6 +24,7 @@
 		var undonew = 0;
 		var prevKey = 0;
 		var yankbuffer = "";
+		var yankbuffermode = -1;
 		var horizontal = 0;
 		var memoryline = [];
 		var topmargin = 3;
@@ -402,6 +403,7 @@
 								modifyCode = 0;
 								var val = elm.value;
 								yankbuffer = val.substr(pos - tl.currLineText.length, tl.currLineTextAll.length + 1);
+								yankbuffermode = 0;
 							} else {
 								modifyCode = e.keyCode;
 							}
@@ -426,6 +428,7 @@
 								var nl2 = pos - tl.currLineText.length + tl.currLineTextAll.length + 1;
 								var val = elm.value;
 								yankbuffer = val.substr(pos - tl.currLineText.length, tl.currLineTextAll.length + 1);
+								yankbuffermode = 0;
 								elm.value = val.substr(0, nl) + val.substr(nl2, val.length);
 								elm.setSelectionRange(nl, nl);
 								undobuffer[undopoint] = elm.value
@@ -448,6 +451,8 @@
 							}
 							var val = elm.value;
 							var pos2 = pos - tl.currLineText.length + tl.currLineTextAll.length;
+							yankbuffer = val.substr(pos, tl.currLineTextAll.length - tl.currLineText.length);
+							yankbuffermode = 1;
 							elm.value = val.substr(0, pos) + val.substr(pos2, val.length);
 							elm.setSelectionRange(pos, pos);
 							undobuffer[undopoint] = elm.value
@@ -469,6 +474,8 @@
 							}
 							var val = elm.value;
 							var pos2 = pos - tl.currLineText.length + tl.currLineTextAll.length;
+							yankbuffer = val.substr(pos, tl.currLineTextAll.length - tl.currLineText.length);
+							yankbuffermode = 1;
 							elm.value = val.substr(0, pos) + val.substr(pos2, val.length);
 							elm.setSelectionRange(pos-1, pos-1);
 							undobuffer[undopoint] = elm.value
@@ -504,9 +511,14 @@
 								}
 							}
 							var val = elm.value;
-							var nl = pos - tl.currLineText.length + tl.currLineTextAll.length + 1;
-							elm.value = val.substr(0, nl) + yankbuffer + val.substr(nl, val.length);
-							elm.setSelectionRange(nl, nl);
+							if (yankbuffermode == 0) {
+								var nl = pos - tl.currLineText.length + tl.currLineTextAll.length + 1;
+								elm.value = val.substr(0, nl) + yankbuffer + val.substr(nl, val.length);
+								elm.setSelectionRange(nl, nl);
+							} else {
+								elm.value = val.substr(0, pos + 1) + yankbuffer + val.substr(pos + 1, val.length);
+								elm.setSelectionRange(pos, pos);
+							}
 							undobuffer[undopoint] = elm.value
 							modifyCode = 0;
 							break;
@@ -526,9 +538,14 @@
 								}
 							}
 							var val = elm.value;
-							toppos = pos - tl.currLineText.length;
-							elm.value = val.substr(0, toppos) + yankbuffer + val.substr(toppos, val.length);
-							elm.setSelectionRange(toppos, toppos);
+							if (yankbuffermode == 0) {
+								toppos = pos - tl.currLineText.length;
+								elm.value = val.substr(0, toppos) + yankbuffer + val.substr(toppos, val.length);
+								elm.setSelectionRange(toppos, toppos);
+							} else {
+								elm.value = val.substr(0, pos) + yankbuffer + val.substr(pos, val.length);
+								elm.setSelectionRange(pos, pos);
+							}
 							undobuffer[undopoint] = elm.value
 							modifyCode = 0;
 							break;
