@@ -75,33 +75,38 @@
 							case 68: // ctrl+d
 								var jump = pos - tl.currLineText.length;
 								var loop = tl.currLine + parseInt(vline / 2);
-								if (loop > tl.maxLine) {
-									loop = tl.maxLine;
+								if (loop < tl.maxLine) {
+									for (i = tl.currLine; i < loop; i++) {
+										jump += tl.allLines[i].length + 1;
+									}
+									elm.setSelectionRange(jump, jump);
+									var tl2 = getLineText(this);
+									if (startLine + parseInt(vline / 2) * 3 < tl.maxLine) {
+										startLine += parseInt((vline - 1) / 2);
+										var startPos = startLine * parseFloat(jQuery(this).css("line-height"));
+										jQuery(this).scrollTop(startPos);
+									}
+									e.keyCode = 0;
 								}
-								for (i = tl.currLine; i < loop; i++) {
-									jump += tl.allLines[i].length + 1;
-								}
-								elm.setSelectionRange(jump, jump);
-								var tl2 = getLineText(this);
-								startLine = tl2.currLine - parseInt(vline / 2);
-								var startPos = startLine * parseFloat(jQuery(this).css("line-height"));
-								jQuery(this).scrollTop(startPos);
 								break;
 
 							case 85: // ctrl+u
 								var jump = pos - tl.currLineText.length;
 								var loop = tl.currLine - parseInt(vline / 2);
-								if (loop < 0) {
-									loop = 0;
+								if (loop > 0) {
+									for (i = tl.currLine; i > loop; i--) {
+										jump -= (tl.allLines[i].length + 1);
+									}
+									elm.setSelectionRange(jump, jump);
+									var tl2 = getLineText(this);
+									startLine = tl2.currLine - parseInt(vline / 2);
+									if (startLine < 0) {
+										startLine = 0;
+									}
+									var startPos = startLine * parseFloat(jQuery(this).css("line-height"));
+									jQuery(this).scrollTop(startPos);
+									e.keyCode = 0;
 								}
-								for (i = tl.currLine; i > loop; i--) {
-									jump -= (tl.allLines[i].length + 1);
-								}
-								elm.setSelectionRange(jump, jump);
-								var tl2 = getLineText(this);
-								startLine = tl2.currLine - parseInt(vline / 2);
-								var startPos = startLine * parseFloat(jQuery(this).css("line-height"));
-								jQuery(this).scrollTop(startPos);
 								break;
 
 							case 69: // ctrl+e
@@ -187,6 +192,7 @@
 			var elm = e.target;
 			var pos = elm.selectionStart;
 			var tl = getLineText(this);
+			//console.log("currLine="+tl.currLine);
 			switch (mode) {
 				case "edit":
 					switch (e.keyCode) {
@@ -198,7 +204,6 @@
 					e.preventDefault();
 					// 行記憶
 					if (modifyCode == 109 && e.keyCode >= 96 && e.keyCode <= 122) {
-						tl = getLineText(this);
 						memoryline[e.keyCode] = {pos: pos - tl.currLineText.length, line: tl.currLine};
 						modifyCode = 0;
 						e.keyCode = 0;
@@ -281,9 +286,9 @@
 							modifyCode = 0;
 							break;
 
-						case 72: // ctrl+h
+						case 72: // shift+h
 							var jump = pos - tl.currLineText.length;
-							var loop = startLine + topmargin - 1;
+							var loop = startLine + topmargin;
 							for (i = tl.currLine - 1; i > loop; i--) {
 								jump -= (tl.allLines[i].length + 1);
 							}
@@ -291,9 +296,12 @@
 							modifyCode = 0;
 							break;
 
-						case 76: // ctrl+l
+						case 76: // shift+l
 							var jump = pos - tl.currLineText.length;
 							var loop = startLine + (vline - 1) - bottommargin;
+							if (loop > tl.maxLine) {
+								loop = tl.maxLine;
+							}
 							for (i = tl.currLine; i < loop; i++) {
 								jump += (tl.allLines[i].length + 1);
 							}
@@ -301,7 +309,7 @@
 							modifyCode = 0;
 							break;
 
-						case 77: // ctrl+m
+						case 77: // shift+m
 							var jump = pos - tl.currLineText.length;
 							var loop = startLine + parseInt(vline / 2);
 							if (loop > tl.currLine) {
