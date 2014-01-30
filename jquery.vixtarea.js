@@ -352,7 +352,7 @@
 							modifyCode = 0;
 							break;
 
-						case 103: // g
+						case 103: // gg
 							if (modifyCode == 103) {
 								modifyCode = 0;
 								elm.setSelectionRange(0, 0);
@@ -616,6 +616,10 @@
 										undopoint = 0;
 									}
 								}
+							} else {
+								var str = undobuffer[undopoint];
+								elm.value = str;
+								elm.setSelectionRange(pos, pos);
 							}
 							modifyCode = 0;
 							break;
