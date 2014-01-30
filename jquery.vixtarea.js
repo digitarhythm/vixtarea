@@ -8,7 +8,7 @@
 			method: undefined
         }, options);
 
-		var permitKeyCode = [16, 186, 191, 65, 68, 79, 73, 88, 85, 82, 90, 72, 74, 75, 76, 89, 71, 82, 52, 54, 80, 77, 222, 192];
+		var permitKeyCode = [16, 186, 191, 65, 68, 79, 73, 88, 85, 82, 90, 72, 74, 75, 76, 89, 71, 82, 52, 54, 80, 77, 222, 192, 190];
 
 		var MAXUNDO = 256 + 1;
 
@@ -25,6 +25,7 @@
 		var topmargin = 3;
 		var bottommargin = 3;
 		var startLine = 0;
+		var lastcommand = "";
 
 		this.css("font-size", options.size);
 		this.css("line-height", options.size);
@@ -65,35 +66,38 @@
 					if (prevKey == 17 && e.keyCode != 82) {
 						e.preventDefault();
 						prevKey = 17;
-						if (e.keyCode == 68) {
-							var jump = pos - tl.currLineText.length;
-							var loop = tl.currLine + parseInt(vline / 2);
-							if (loop > tl.maxLine) {
-								loop = tl.maxLine;
-							}
-							for (i = tl.currLine; i < loop; i++) {
-								jump += tl.allLines[i].length + 1;
-							}
-							elm.setSelectionRange(jump, jump);
-							var tl2 = getLineText(this);
-							startLine = tl2.currLine - parseInt(vline / 2);
-							var startPos = startLine * parseFloat(jQuery(this).css("line-height"));
-							jQuery(this).scrollTop(startPos);
-						} else
-						if (e.keyCode == 85) {
-							var jump = pos - tl.currLineText.length;
-							var loop = tl.currLine - parseInt(vline / 2);
-							if (loop < 0) {
-								loop = 0;
-							}
-							for (i = tl.currLine; i > loop; i--) {
-								jump -= (tl.allLines[i].length + 1);
-							}
-							elm.setSelectionRange(jump, jump);
-							var tl2 = getLineText(this);
-							startLine = tl2.currLine - parseInt(vline / 2);
-							var startPos = startLine * parseFloat(jQuery(this).css("line-height"));
-							jQuery(this).scrollTop(startPos);
+						switch (e.keyCode) {
+							case 68: // ctrl+d
+								var jump = pos - tl.currLineText.length;
+								var loop = tl.currLine + parseInt(vline / 2);
+								if (loop > tl.maxLine) {
+									loop = tl.maxLine;
+								}
+								for (i = tl.currLine; i < loop; i++) {
+									jump += tl.allLines[i].length + 1;
+								}
+								elm.setSelectionRange(jump, jump);
+								var tl2 = getLineText(this);
+								startLine = tl2.currLine - parseInt(vline / 2);
+								var startPos = startLine * parseFloat(jQuery(this).css("line-height"));
+								jQuery(this).scrollTop(startPos);
+								break;
+
+							case 85: // ctrl+u
+								var jump = pos - tl.currLineText.length;
+								var loop = tl.currLine - parseInt(vline / 2);
+								if (loop < 0) {
+									loop = 0;
+								}
+								for (i = tl.currLine; i > loop; i--) {
+									jump -= (tl.allLines[i].length + 1);
+								}
+								elm.setSelectionRange(jump, jump);
+								var tl2 = getLineText(this);
+								startLine = tl2.currLine - parseInt(vline / 2);
+								var startPos = startLine * parseFloat(jQuery(this).css("line-height"));
+								jQuery(this).scrollTop(startPos);
+								break;
 						}
 					} else {
 						prevKey = e.keyCode;
@@ -115,7 +119,8 @@
 				case "command":
 					break;
 			}
-			//console.log("prevKey="+prevKey);
+
+			// エスケープを押した
 			if ((e.keyCode == 27 || e.keyCode == 192) && (mode == "edit" || mode == "command") && prevKey != 16) {
 				modifyCode = 0;
 				switch (mode) {
@@ -140,6 +145,9 @@
 							pos--;
 							elm.setSelectionRange(pos, pos);
 						}
+						break;
+
+					case "view":
 						break;
 				}
 				mode = "view";
@@ -259,11 +267,13 @@
 
 						case 105: // i
 							mode = "edit";
+							lastcommand = "insert_string";
 							modifyCode = 0;
 							break;
 
 						case 97: // a
 							mode = "edit";
+							lastcommand = "append_string";
 							var val = elm.value;
 							ch = val.substr(pos, 1);
 							code = ch.charCodeAt(0);
@@ -277,6 +287,7 @@
 
 						case 111: // o
 							mode = "edit";
+							lastcommand = "append_line";
 							var nl = pos - tl.currLineText.length + tl.currLineTextAll.length + 1;
 							var val = elm.value;
 							elm.value = val.substr(0, nl) + '\n' + val.substr(nl, val.length);
@@ -286,6 +297,7 @@
 
 						case 79: // O
 							mode = "edit";
+							lastcommand = "insert_line";
 							var nl = pos - tl.currLineText.length;
 							var val = elm.value;
 							elm.value = val.substr(0, nl) + '\n' + val.substr(nl, val.length);
@@ -305,6 +317,7 @@
 
 						case 100: // dd
 							if (modifyCode == 100) {
+								lastcommand = "delete_line";
 								modifyCode = 0;
 								undopoint++;
 								if (undopoint == MAXUNDO) {
@@ -329,7 +342,22 @@
 							}
 							break;
 
+						case 122: // zz
+							if (modifyCode == 122) {
+								modifyCode = 0;
+								var currPos = tl.currLine - parseInt(vline / 2);
+								if (currPos < 0) {
+									currPos = 0;
+								}
+								var startPos = currPos * parseFloat(jQuery(this).css("line-height"));
+								jQuery(this).scrollTop(startPos);
+							} else {
+								modifyCode = e.keyCode;
+							}
+							break;
+
 						case 112: // p
+							lastcommand = "append_buffer";
 							e.preventDefault();
 							undopoint++;
 							if (undopoint == MAXUNDO) {
@@ -351,6 +379,7 @@
 							break;
 
 						case 80: // P
+							lastcommand = "insert_buffer";
 							e.preventDefault();
 							undopoint++;
 							if (undopoint == MAXUNDO) {
@@ -372,6 +401,7 @@
 							break;
 
 						case 120: // x
+							lastcommand = "delete_character";
 							undopoint++;
 							if (undopoint == MAXUNDO) {
 								undopoint = 0;
