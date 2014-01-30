@@ -8,7 +8,11 @@
 			method: undefined
         }, options);
 
-		var permitKeyCode = [16, 186, 191, 65, 68, 79, 73, 88, 85, 82, 90, 72, 74, 75, 76, 89, 71, 82, 52, 54, 80, 77, 222, 192, 190, 69];
+		if (undobuffer != undefined) {
+			return;
+		}
+
+		var permitKeyCode = [16, 186, 191, 65, 67, 68, 79, 73, 88, 85, 82, 90, 72, 74, 75, 76, 89, 71, 82, 52, 54, 80, 77, 222, 192, 190, 69];
 
 		var MAXUNDO = 256 + 1;
 
@@ -132,7 +136,6 @@
 					if (e.keyCode === 9) { // TAB
 						e.preventDefault();
 						var val = elm.value;
-						var pos = elm.selectionStart;
 						elm.value = val.substr(0, pos) + '\t' + val.substr(pos, val.length);
 						elm.setSelectionRange(pos + 1, pos + 1);
 					}
@@ -429,6 +432,47 @@
 							} else {
 								modifyCode = e.keyCode;
 							}
+							break;
+
+						case 67: // C
+							undopoint++;
+							if (undopoint == MAXUNDO) {
+								undopoint = 0;
+							}
+							undonew = undopoint;
+							if (undopoint == undotop) {
+								undotop++;
+								if (undotop == MAXUNDO) {
+									undotop = 0;
+								}
+							}
+							var val = elm.value;
+							var pos2 = pos - tl.currLineText.length + tl.currLineTextAll.length;
+							elm.value = val.substr(0, pos) + val.substr(pos2, val.length);
+							elm.setSelectionRange(pos, pos);
+							undobuffer[undopoint] = elm.value
+							mode = "edit";
+							modifyCode = 0;
+							break;
+
+						case 68: // D
+							undopoint++;
+							if (undopoint == MAXUNDO) {
+								undopoint = 0;
+							}
+							undonew = undopoint;
+							if (undopoint == undotop) {
+								undotop++;
+								if (undotop == MAXUNDO) {
+									undotop = 0;
+								}
+							}
+							var val = elm.value;
+							var pos2 = pos - tl.currLineText.length + tl.currLineTextAll.length;
+							elm.value = val.substr(0, pos) + val.substr(pos2, val.length);
+							elm.setSelectionRange(pos-1, pos-1);
+							undobuffer[undopoint] = elm.value
+							modifyCode = 0;
 							break;
 
 						case 122: // zz
