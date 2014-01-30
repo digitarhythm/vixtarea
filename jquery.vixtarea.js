@@ -8,7 +8,7 @@
 			method: undefined
         }, options);
 
-		var permitKeyCode = [16, 186, 191, 65, 68, 79, 73, 88, 85, 82, 90, 72, 74, 75, 76, 89, 71, 82, 52, 54, 80, 77, 222, 192, 190];
+		var permitKeyCode = [16, 186, 191, 65, 68, 79, 73, 88, 85, 82, 90, 72, 74, 75, 76, 89, 71, 82, 52, 54, 80, 77, 222, 192, 190, 69];
 
 		var MAXUNDO = 256 + 1;
 
@@ -98,6 +98,29 @@
 								var startPos = startLine * parseFloat(jQuery(this).css("line-height"));
 								jQuery(this).scrollTop(startPos);
 								break;
+
+							case 69: // ctrl+e
+								startLine++;
+								if (tl.currLine < startLine + topmargin) {
+									var nextpos = (pos - tl.currLineText.length) + tl.currLineTextAll.length + 1;
+									elm.setSelectionRange(nextpos, nextpos);
+								}
+								var startPos = startLine * parseFloat(jQuery(this).css("line-height"));
+								jQuery(this).scrollTop(startPos);
+								modifyCode = 0;
+								break;
+
+							case 89: // ctrl+y
+								startLine--;
+								if (tl.currLine > startLine + ((vline - 1) - bottommargin)) {
+									var nextpos = (pos - tl.currLineText.length - tl.prevLineText.length) - 1;
+									elm.setSelectionRange(nextpos, nextpos);
+								}
+								var startPos = startLine * parseFloat(jQuery(this).css("line-height"));
+								jQuery(this).scrollTop(startPos);
+								modifyCode = 0;
+								break;
+
 						}
 					} else {
 						prevKey = e.keyCode;
