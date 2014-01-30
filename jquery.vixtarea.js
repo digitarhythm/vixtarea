@@ -8,7 +8,7 @@
 			method: undefined
         }, options);
 
-		var permitKeyCode = [16, 186, 191, 65, 79, 68, 73, 88, 85, 82, 90, 72, 74, 75, 76, 89, 71, 82, 52, 54, 80, 77, 222, 192];
+		var permitKeyCode = [16, 186, 191, 65, 68, 79, 73, 88, 85, 82, 90, 72, 74, 75, 76, 89, 71, 82, 52, 54, 80, 77, 222, 192];
 
 		var MAXUNDO = 256 + 1;
 
@@ -47,6 +47,8 @@
 		// keydown ######################################################################################################
 		this.keydown(function(e) {
 			var elm = e.target;
+			var pos = elm.selectionStart;
+			var tl = getLineText(this);
 			//console.log("keydown="+e.keyCode);
 			switch (mode) {
 				case "view":
@@ -63,6 +65,36 @@
 					if (prevKey == 17 && e.keyCode != 82) {
 						e.preventDefault();
 						prevKey = 17;
+						if (e.keyCode == 68) {
+							var jump = pos - tl.currLineText.length;
+							var loop = tl.currLine + parseInt(vline / 2);
+							if (loop > tl.maxLine) {
+								loop = tl.maxLine;
+							}
+							for (i = tl.currLine; i < loop; i++) {
+								jump += tl.allLines[i].length + 1;
+							}
+							elm.setSelectionRange(jump, jump);
+							var tl2 = getLineText(this);
+							startLine = tl2.currLine - parseInt(vline / 2);
+							var startPos = startLine * parseFloat(jQuery(this).css("line-height"));
+							jQuery(this).scrollTop(startPos);
+						} else
+						if (e.keyCode == 85) {
+							var jump = pos - tl.currLineText.length;
+							var loop = tl.currLine - parseInt(vline / 2);
+							if (loop < 0) {
+								loop = 0;
+							}
+							for (i = tl.currLine; i > loop; i--) {
+								jump -= (tl.allLines[i].length + 1);
+							}
+							elm.setSelectionRange(jump, jump);
+							var tl2 = getLineText(this);
+							startLine = tl2.currLine - parseInt(vline / 2);
+							var startPos = startLine * parseFloat(jQuery(this).css("line-height"));
+							jQuery(this).scrollTop(startPos);
+						}
 					} else {
 						prevKey = e.keyCode;
 					}
@@ -111,8 +143,6 @@
 						break;
 				}
 				mode = "view";
-			} else {
-				prevKey = e.keyCode;
 			}
 		});
 	
@@ -144,8 +174,6 @@
 							linenum = memoryline[e.keyCode].line;
 							jump = memoryline[e.keyCode].pos;
 							elm.setSelectionRange(jump, jump);
-							currpos = linenum * parseFloat(jQuery(this).css("line-height"));
-							jQuery(this).scrollTop(currpos);
 							startLine = linenum - parseInt(vline / 2);
 							var startPos = startLine * parseFloat(jQuery(this).css("line-height"));
 							jQuery(this).scrollTop(startPos);
@@ -404,6 +432,7 @@
 								elm.value = undobuffer[undopoint];
 								elm.setSelectionRange(pos, pos);
 							}
+							prevKey = 17;
 							modifyCode = 0;
 							break;
 
@@ -465,6 +494,7 @@
 		retvalue['currLineText'] = lines[retvalue.currLine];
 		retvalue['currLineTextAll'] = alllines[retvalue.currLine];
 		retvalue['nextLineText'] = alllines[retvalue.currLine + 1];
+		retvalue['allLines'] = alllines;
 		return retvalue;
 	}
 
