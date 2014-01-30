@@ -16,7 +16,7 @@
 			return;
 		}
 
-		var permitKeyCode = [16, 186, 191, 65, 67, 68, 79, 73, 88, 85, 82, 90, 72, 74, 75, 76, 89, 71, 82, 52, 54, 80, 77, 222, 192, 190, 69];
+		var permitKeyCode = [16, 186, 191, 65, 67, 68, 79, 73, 88, 85, 82, 90, 72, 74, 75, 76, 89, 71, 82, 52, 54, 80, 77, 222, 192, 69, 219];
 
 		var MAXUNDO = 256 + 1;
 
@@ -56,15 +56,15 @@
 
 		// keydown ######################################################################################################
 		this.keydown(function(e) {
+			//console.log("keydown="+e.keyCode);
 			var elm = e.target;
 			var pos = elm.selectionStart;
 			var tl = getLineText(this);
-			//console.log("keydown="+e.keyCode);
 			switch (mode) {
 				case "view":
 					permit = permitKeyCode.indexOf(e.keyCode);
 					if (permit == -1 && modifyCode != 109 && modifyCode != 222) {
-						//console.log("preventDefault="+e.keyCode+", modifyCode="+modifyCode);
+						console.log("preventDefault="+e.keyCode+", modifyCode="+modifyCode);
 						e.preventDefault();
 					}
 
@@ -157,7 +157,7 @@
 			}
 
 			// エスケープを押した
-			if ((e.keyCode == 27 || e.keyCode == 192) && (mode == "edit" || mode == "command") && prevKey != 16) {
+			if ((e.keyCode == 27 && (mode == "edit" || mode == "command") && prevKey != 16) || e.keyCode == 219) {
 				modifyCode = 0;
 				switch (mode) {
 					case "edit":
