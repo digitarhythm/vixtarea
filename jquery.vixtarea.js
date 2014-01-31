@@ -59,9 +59,9 @@
 			//console.log("keydown="+e.keyCode);
 			var elm = e.target;
 			var pos = elm.selectionStart;
-			var tl = getLineText(this);
 			switch (mode) {
 				case "view":
+					var tl = getLineText(this);
 					permit = permitKeyCode.indexOf(e.keyCode);
 					if (permit == -1 && modifyCode != 109 && modifyCode != 222) {
 						//console.log("preventDefault="+e.keyCode+", modifyCode="+modifyCode);
@@ -149,7 +149,6 @@
 						elm.value = val.substr(0, pos) + '\t' + val.substr(pos, val.length);
 						elm.setSelectionRange(pos + 1, pos + 1);
 					}
-
 					break;
 
 				case "command":
@@ -195,7 +194,6 @@
 			//console.log("keypress="+e.keyCode);
 			var elm = e.target;
 			var pos = elm.selectionStart;
-			var tl = getLineText(this);
 			//console.log("currLine="+tl.currLine);
 			switch (mode) {
 				case "edit":
@@ -205,6 +203,7 @@
 					}
 					break;
 				case "view":
+					var tl = getLineText(this);
 					e.preventDefault();
 					// 行記憶
 					if (modifyCode == 109 && e.keyCode >= 96 && e.keyCode <= 122) {
