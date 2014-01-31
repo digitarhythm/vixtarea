@@ -64,7 +64,7 @@
 				case "view":
 					permit = permitKeyCode.indexOf(e.keyCode);
 					if (permit == -1 && modifyCode != 109 && modifyCode != 222) {
-						console.log("preventDefault="+e.keyCode+", modifyCode="+modifyCode);
+						//console.log("preventDefault="+e.keyCode+", modifyCode="+modifyCode);
 						e.preventDefault();
 					}
 
