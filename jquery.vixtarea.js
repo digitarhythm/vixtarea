@@ -43,6 +43,7 @@
 		this.css("background-color", options.backgroundColor);
 
 		var vline = parseInt(this.css("height")) / parseInt(options.size);
+		var hchar = parseInt(this.css("width")) / parseInt(options.size);
 
 		// keyup ######################################################################################################
 		this.keyup(function(e) {
@@ -145,9 +146,13 @@
 				case "edit":
 					if (e.keyCode === 9) { // TAB
 						e.preventDefault();
+						var tl = getLineText(this);
 						var val = elm.value;
-						elm.value = val.substr(0, pos) + '\t' + val.substr(pos, val.length);
-						elm.setSelectionRange(pos + 1, pos + 1);
+						var spc = "    ";
+						var addspc = spc.substr(tl.currLineText.length % 4);
+						//elm.value = val.substr(0, pos) + '    ' + val.substr(pos, val.length);
+						setElementValue(this, val.substr(0, pos) + addspc + val.substr(pos, val.length));
+						elm.setSelectionRange(pos + (4 - tl.currLineText.length % 4), pos + (4 - tl.currLineText.length % 4));
 					}
 					break;
 
@@ -340,7 +345,7 @@
 						case 36: // shift+4
 							tl = getLineText(this);
 							var nl = pos + tl.currLineTextAll.length - tl.currLineText.length;
-							elm.setSelectionRange(nl, nl);
+							elm.setSelectionRange(nl - 1, nl - 1);
 							modifyCode = 0;
 							break;
 
@@ -394,7 +399,8 @@
 							lastcommand = "append_line";
 							var nl = pos - tl.currLineText.length + tl.currLineTextAll.length + 1;
 							var val = elm.value;
-							elm.value = val.substr(0, nl) + '\n' + val.substr(nl, val.length);
+							//elm.value = val.substr(0, nl) + '\n' + val.substr(nl, val.length);
+							setElementValue(this, val.substr(0, nl) + '\n' + val.substr(nl, val.length));
 							elm.setSelectionRange(nl, nl);
 							modifyCode = 0;
 							break;
@@ -404,7 +410,8 @@
 							lastcommand = "insert_line";
 							var nl = pos - tl.currLineText.length;
 							var val = elm.value;
-							elm.value = val.substr(0, nl) + '\n' + val.substr(nl, val.length);
+							//elm.value = val.substr(0, nl) + '\n' + val.substr(nl, val.length);
+							setElementValue(this, val.substr(0, nl) + '\n' + val.substr(nl, val.length));
 							elm.setSelectionRange(nl, nl);
 							modifyCode = 0;
 							break;
@@ -440,7 +447,8 @@
 								var val = elm.value;
 								yankbuffer = val.substr(pos - tl.currLineText.length, tl.currLineTextAll.length + 1);
 								yankbuffermode = 0;
-								elm.value = val.substr(0, nl) + val.substr(nl2, val.length);
+								//elm.value = val.substr(0, nl) + val.substr(nl2, val.length);
+								setElementValue(this, val.substr(0, nl) + val.substr(nl2, val.length));
 								elm.setSelectionRange(nl, nl);
 								undobuffer[undopoint] = elm.value
 							} else {
@@ -464,7 +472,8 @@
 							var pos2 = pos - tl.currLineText.length + tl.currLineTextAll.length;
 							yankbuffer = val.substr(pos, tl.currLineTextAll.length - tl.currLineText.length);
 							yankbuffermode = 1;
-							elm.value = val.substr(0, pos) + val.substr(pos2, val.length);
+							//elm.value = val.substr(0, pos) + val.substr(pos2, val.length);
+							setElementValue(this, val.substr(0, pos) + val.substr(pos2, val.length));
 							elm.setSelectionRange(pos, pos);
 							undobuffer[undopoint] = elm.value
 							mode = "edit";
@@ -487,7 +496,8 @@
 							var pos2 = pos - tl.currLineText.length + tl.currLineTextAll.length;
 							yankbuffer = val.substr(pos, tl.currLineTextAll.length - tl.currLineText.length);
 							yankbuffermode = 1;
-							elm.value = val.substr(0, pos) + val.substr(pos2, val.length);
+							//elm.value = val.substr(0, pos) + val.substr(pos2, val.length);
+							setElementValue(this, val.substr(0, pos) + val.substr(pos2, val.length));
 							elm.setSelectionRange(pos-1, pos-1);
 							undobuffer[undopoint] = elm.value
 							modifyCode = 0;
@@ -524,10 +534,12 @@
 							var val = elm.value;
 							if (yankbuffermode == 0) {
 								var nl = pos - tl.currLineText.length + tl.currLineTextAll.length + 1;
-								elm.value = val.substr(0, nl) + yankbuffer + val.substr(nl, val.length);
+								//elm.value = val.substr(0, nl) + yankbuffer + val.substr(nl, val.length);
+								setElementValue(this, val.substr(0, nl) + yankbuffer + val.substr(nl, val.length));
 								elm.setSelectionRange(nl, nl);
 							} else {
-								elm.value = val.substr(0, pos + 1) + yankbuffer + val.substr(pos + 1, val.length);
+								//elm.value = val.substr(0, pos + 1) + yankbuffer + val.substr(pos + 1, val.length);
+								setElementValue(this, val.substr(0, pos + 1) + yankbuffer + val.substr(pos + 1, val.length));
 								elm.setSelectionRange(pos, pos);
 							}
 							undobuffer[undopoint] = elm.value
@@ -551,10 +563,12 @@
 							var val = elm.value;
 							if (yankbuffermode == 0) {
 								toppos = pos - tl.currLineText.length;
-								elm.value = val.substr(0, toppos) + yankbuffer + val.substr(toppos, val.length);
+								//elm.value = val.substr(0, toppos) + yankbuffer + val.substr(toppos, val.length);
+								setElementValue(this, val.substr(0, toppos) + yankbuffer + val.substr(toppos, val.length));
 								elm.setSelectionRange(toppos, toppos);
 							} else {
-								elm.value = val.substr(0, pos) + yankbuffer + val.substr(pos, val.length);
+								//elm.value = val.substr(0, pos) + yankbuffer + val.substr(pos, val.length);
+								setElementValue(this, val.substr(0, pos) + yankbuffer + val.substr(pos, val.length));
 								elm.setSelectionRange(pos, pos);
 							}
 							undobuffer[undopoint] = elm.value
@@ -575,7 +589,8 @@
 								}
 							}
 							var val = elm.value;
-							elm.value = val.substr(0, pos) + val.substr(pos + 1, val.length);
+							//elm.value = val.substr(0, pos) + val.substr(pos + 1, val.length);
+							setElementValue(this, val.substr(0, pos) + val.substr(pos + 1, val.length));
 							elm.setSelectionRange(pos, pos);
 							undobuffer[undopoint] = elm.value;
 							modifyCode = 0;
@@ -595,7 +610,8 @@
 							}
 							var val = elm.value;
 							var lineend = pos - tl.currLineText.length + tl.currLineTextAll.length;
-							elm.value = val.substr(0, lineend) + ' ' + val.substr(lineend + 1, val.length);
+							//elm.value = val.substr(0, lineend) + ' ' + val.substr(lineend + 1, val.length);
+							setElementValue(this, val.substr(0, lineend) + ' ' + val.substr(lineend + 1, val.length));
 							elm.setSelectionRange(lineend, lineend);
 							undobuffer[undopoint] = elm.value;
 							modifyCode = 0;
@@ -608,7 +624,8 @@
 								}
 								var str = undobuffer[undopoint];
 								if (str != undefined) {
-									elm.value = str;
+									//elm.value = str;
+									setElementValue(this, str);
 									elm.setSelectionRange(pos, pos);
 								} else {
 									if (++undopoint == MAXUNDO) {
@@ -617,7 +634,8 @@
 								}
 							} else {
 								var str = undobuffer[undopoint];
-								elm.value = str;
+								//elm.value = str;
+								setElementValue(this, str);
 								elm.setSelectionRange(pos, pos);
 							}
 							modifyCode = 0;
@@ -628,7 +646,8 @@
 								if (++undopoint == MAXUNDO) {
 									undopoint = 0;
 								}
-								elm.value = undobuffer[undopoint];
+								//elm.value = undobuffer[undopoint];
+								setElementValue(this, undobuffer[undopoint]);
 								elm.setSelectionRange(pos, pos);
 							}
 							prevKey = 17;
@@ -645,16 +664,16 @@
 			}
 
 			tl = getLineText(this);
-			if (e.keyCode != 0 && (startLine + (vline - 1) - bottommargin) < tl.currLine) {
-				startLine = tl.currLine - ((vline - 1) - bottommargin);
+			if (e.keyCode != 0 && (startLine + (vline - 1) - bottommargin) < tl.vcurrLine) {
+				startLine = tl.vcurrLine - ((vline - 1) - bottommargin);
 				if (startLine < 0) {
 					startLine = 0;
 				}
 				var startPos = startLine * parseFloat(jQuery(this).css("line-height"));
 				jQuery(this).scrollTop(startPos);
 			}
-			if (e.keyCode != 0 && (startLine + topmargin) > tl.currLine) {
-				startLine = tl.currLine - topmargin;
+			if (e.keyCode != 0 && (startLine + topmargin) > tl.vcurrLine) {
+				startLine = tl.vcurrLine - topmargin;
 				if (startLine < 0) {
 					startLine = 0;
 				}
@@ -665,16 +684,46 @@
 		return this;
 	}
 
+	var setElementValue = function(object, text) {
+		jQuery(object).val(text)
+	}
+
 	var getLineText = function(object) {
 		var textAreaElement = jQuery(object)[0];
 		textAreaElement.selectionStart = 0;
 		var sel = document.getSelection() + "";
 		textAreaElement.selectionStart = textAreaElement.selectionEnd;
 		var retvalue = [];
+
 		var lines = sel.split("\n");
+		var width = parseInt(jQuery(object).css('width'));
+		var size = parseInt(jQuery(object).css('line-height'));
+		var hchar = Math.floor(width / size) * 2;
+		var llength = 0;
+		for (var i = 0; i < lines.length; i++) {
+			var l = lines[i];
+			var ladd = Math.ceil(l.length / hchar) - 1
+			if (ladd < 0) {
+				ladd = 0;
+			};
+			llength += ladd;
+		}
+
 		var alllines = jQuery(object).val().split("\n");
+		var allllength = 0;
+		for (var i = 0; i < alllines.length; i++) {
+			var l = alllines[i];
+			var ladd = Math.ceil(l.length / hchar) - 1
+			if (ladd < 0) {
+				ladd = 0;
+			};
+			allllength += ladd;
+		}
+
 		retvalue['currLine'] = lines.length - 1;
 		retvalue['maxLine'] = alllines.length - 1;
+		retvalue['vcurrLine'] = lines.length + llength - 1;
+		retvalue['vmaxLine'] = alllines.length + allllength - 1;
 		retvalue['prevLineText'] = lines[retvalue.currLine - 1];
 		retvalue['currLineText'] = lines[retvalue.currLine];
 		retvalue['currLineTextAll'] = alllines[retvalue.currLine];
