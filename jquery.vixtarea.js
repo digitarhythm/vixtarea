@@ -67,13 +67,10 @@
                     if (permit == -1 && modifyCode != 109 && modifyCode != 222) {
                         //console.log("preventDefault="+e.keyCode+", modifyCode="+modifyCode);
                         e.preventDefault();
-                    }
-
-                    if (e.keyCode == 222 || e.keyCode == 77) {
+                    } else if (e.keyCode == 222) { // '
                         modifyCode = e.keyCode;
-                    }
-
-                    if (prevKey == 17 && e.keyCode != 82) {
+                        e.preventDefault();
+                    } else if (prevKey == 17 && e.keyCode != 82) {
                         e.preventDefault();
                         prevKey = 17;
                         switch (e.keyCode) {
@@ -209,20 +206,19 @@
                     break;
                 case "view":
                     var tl = getLineText(this);
-                    if (modifyCode != 114) {
+                    if (modifyCode != 114) { // r
                         e.preventDefault();
                     }
 
+                    // 2ストロークオペレーション #########################################################
                     if (modifyCode != 0) {
-                        if (modifyCode == 114) {
-                            undopoint++;
-                            if (undopoint == MAXUNDO) {
+                        if (modifyCode == 114) { // r
+                            if (++undopoint == MAXUNDO) {
                                 undopoint = 0;
                             }
                             undonew = undopoint;
                             if (undopoint == undotop) {
-                                undotop++;
-                                if (undotop == MAXUNDO) {
+                                if (++undotop == MAXUNDO) {
                                     undotop = 0;
                                 }
                             }
@@ -232,14 +228,27 @@
                             yankbuffermode = 1;
                             setElementValue(this, val.substr(0, pos) + String.fromCharCode(e.keyCode) + val.substr(pos + 1));
                             elm.setSelectionRange(pos, pos);
-
-
-
-
                             undobuffer[undopoint] = elm.value
+                        } else if (modifyCode == 109) {
+                            // 行記憶
+                            memoryline[e.keyCode] = {pos: pos - tl.currLineText.length, line: tl.currLine};
+                            modifyCode = 0;
+                            e.keyCode = 0;
+                        //} else if (modifyCode == 222 && e.keyCode >= 97 && e.keyCode <= 122) {
+                        } else if (modifyCode == 222) {
+                            // 行復帰
+                            if (memoryline[e.keyCode] != undefined) {
+                                linenum = memoryline[e.keyCode].line;
+                                jump = memoryline[e.keyCode].pos;
+                                elm.setSelectionRange(jump, jump);
+                                startLine = linenum - parseInt(vline / 2);
+                                var startPos = startLine * parseFloat(jQuery(this).css("line-height"));
+                                jQuery(this).scrollTop(startPos);
+                            }
+                            modifyCode = 0;
+                            e.keyCode = 0;
                         } else {
                             switch (e.keyCode) {
-                                // 2ストロークオペレーション #########################################################
                                 case 103: // gg
                                     if (modifyCode == 103) {
                                         elm.setSelectionRange(0, 0);
@@ -258,14 +267,12 @@
                                 case 100: // dd
                                     if (modifyCode == 100) {
                                         lastcommand = "delete_line";
-                                        undopoint++;
-                                        if (undopoint == MAXUNDO) {
+                                        if (++undopoint == MAXUNDO) {
                                             undopoint = 0;
                                         }
                                         undonew = undopoint;
                                         if (undopoint == undotop) {
-                                            undotop++;
-                                            if (undotop == MAXUNDO) {
+                                            if (++undotop == MAXUNDO) {
                                                 undotop = 0;
                                             }
                                         }
@@ -283,57 +290,39 @@
 
                                 case 119: // cw
                                     if (modifyCode == 99) {
-                                        var after = tl.currLineTextAll.substr(tl.currLineText.length);
-                                        var mtc = after.match(/(.*?)[\.,\/:;\'\"@\(\)\[\]\{\}|\<\>\-\ ]/);
-                                        if (mtc != null) {
-                                            undopoint++;
-                                            if (undopoint == MAXUNDO) {
-                                                undopoint = 0;
-                                            }
-                                            undonew = undopoint;
-                                            if (undopoint == undotop) {
-                                                undotop++;
-                                                if (undotop == MAXUNDO) {
-                                                    undotop = 0;
-                                                }
-                                            }
-
-                                            var pos2 = pos + mtc[1].length;
-                                            var val = elm.value;
-                                            yankbuffer = val.substr(pos, mtc[1].length);
-                                            yankbuffermode = 1;
-                                            setElementValue(this, val.substr(0, pos) + val.substr(pos2));
-                                            elm.setSelectionRange(pos, pos);
-
-                                            undobuffer[undopoint] = elm.value
+                                        var val = elm.value;
+                                        if (++undopoint == MAXUNDO) {
+                                            undopoint = 0;
                                         }
+                                        undonew = undopoint;
+                                        if (undopoint == undotop) {
+                                            if (++undotop == MAXUNDO) {
+                                                undotop = 0;
+                                            }
+                                        }
+                                        var after = tl.currLineTextAll.substr(tl.currLineText.length);
+                                        var mtc = after.match(/(.*?)[\.,\/:;\'\"@\(\)\[\]\{\}|\<\>\-\ \n]/);
+                                        if (mtc != null) {
+                                            var pos2 = pos + mtc[1].length;
+                                            yankbuffer = val.substr(pos, mtc[1].length);
+                                        } else {
+                                            var pos2 = pos + tl.currLineTextAll.length - tl.currLineText.length;
+                                            yankbuffer = val.substr(pos, tl.currLineTextAll.length - tl.currLineText.length);
+                                        }
+                                        yankbuffermode = 1;
+                                        setElementValue(this, val.substr(0, pos) + val.substr(pos2));
+                                        elm.setSelectionRange(pos, pos);
+                                        undobuffer[undopoint] = elm.value
+                                        mode = "edit";
                                     }
                                     break;
 
                             }
+
                         }
                         modifyCode = 0;
                     } else {
 
-                        // 行記憶
-                        if (modifyCode == 109 && e.keyCode >= 96 && e.keyCode <= 122) {
-                            memoryline[e.keyCode] = {pos: pos - tl.currLineText.length, line: tl.currLine};
-                            modifyCode = 0;
-                            e.keyCode = 0;
-                        }
-                        // 行復帰
-                        if (modifyCode == 222 && e.keyCode >= 97 && e.keyCode <= 122) {
-                            if (memoryline[e.keyCode] != undefined) {
-                                linenum = memoryline[e.keyCode].line;
-                                jump = memoryline[e.keyCode].pos;
-                                elm.setSelectionRange(jump, jump);
-                                startLine = linenum - parseInt(vline / 2);
-                                var startPos = startLine * parseFloat(jQuery(this).css("line-height"));
-                                jQuery(this).scrollTop(startPos);
-                            }
-                            modifyCode = 0;
-                            e.keyCode = 0;
-                        }
                         switch (e.keyCode) {
                             // エディター操作 ##################################################
                             case 103: // g
@@ -351,6 +340,10 @@
                             case 114: //r
                                 modifyCode = e.keyCode;
                                 break;
+                            case 109: // m
+                                modifyCode = e.keyCode;
+                                break;
+
                                 
                             case 104: // h
                                 elm.focus();
@@ -458,10 +451,6 @@
                                 modifyCode = 0;
                                 break;
 
-                            case 109: // m
-                                modifyCode = e.keyCode;
-                                break;
-
                             case 36: // shift+4
                                 tl = getLineText(this);
                                 var nl = pos + tl.currLineTextAll.length - tl.currLineText.length;
@@ -527,14 +516,12 @@
                                 break;
 
                             case 67: // C
-                                undopoint++;
-                                if (undopoint == MAXUNDO) {
+                                if (++undopoint == MAXUNDO) {
                                     undopoint = 0;
                                 }
                                 undonew = undopoint;
                                 if (undopoint == undotop) {
-                                    undotop++;
-                                    if (undotop == MAXUNDO) {
+                                    if (++undotop == MAXUNDO) {
                                         undotop = 0;
                                     }
                                 }
@@ -551,14 +538,12 @@
                                 break;
 
                             case 68: // D
-                                undopoint++;
-                                if (undopoint == MAXUNDO) {
+                                if (++undopoint == MAXUNDO) {
                                     undopoint = 0;
                                 }
                                 undonew = undopoint;
                                 if (undopoint == undotop) {
-                                    undotop++;
-                                    if (undotop == MAXUNDO) {
+                                    if (++undotop == MAXUNDO) {
                                         undotop = 0;
                                     }
                                 }
@@ -590,14 +575,12 @@
                             case 112: // p
                                 lastcommand = "append_buffer";
                                 //e.preventDefault();
-                                undopoint++;
-                                if (undopoint == MAXUNDO) {
+                                if (++undopoint == MAXUNDO) {
                                     undopoint = 0;
                                 }
                                 undonew = undopoint;
                                 if (undopoint == undotop) {
-                                    undotop++;
-                                    if (undotop == MAXUNDO) {
+                                    if (++undotop == MAXUNDO) {
                                         undotop = 0;
                                     }
                                 }
@@ -619,14 +602,12 @@
                             case 80: // P
                                 lastcommand = "insert_buffer";
                                 //e.preventDefault();
-                                undopoint++;
-                                if (undopoint == MAXUNDO) {
+                                if (++undopoint == MAXUNDO) {
                                     undopoint = 0;
                                 }
                                 undonew = undopoint;
                                 if (undopoint == undotop) {
-                                    undotop++;
-                                    if (undotop == MAXUNDO) {
+                                    if (++undotop == MAXUNDO) {
                                         undotop = 0;
                                     }
                                 }
@@ -647,14 +628,12 @@
 
                             case 120: // x
                                 lastcommand = "delete_character";
-                                undopoint++;
-                                if (undopoint == MAXUNDO) {
+                                if (++undopoint == MAXUNDO) {
                                     undopoint = 0;
                                 }
                                 undonew = undopoint;
                                 if (undopoint == undotop) {
-                                    undotop++;
-                                    if (undotop == MAXUNDO) {
+                                    if (++undotop == MAXUNDO) {
                                         undotop = 0;
                                     }
                                 }
@@ -667,14 +646,12 @@
                                 break;
 
                             case 74: // J
-                                undopoint++;
-                                if (undopoint == MAXUNDO) {
+                                if (++undopoint == MAXUNDO) {
                                     undopoint = 0;
                                 }
                                 undonew = undopoint;
                                 if (undopoint == undotop) {
-                                    undotop++;
-                                    if (undotop == MAXUNDO) {
+                                    if (++undotop == MAXUNDO) {
                                         undotop = 0;
                                     }
                                 }
