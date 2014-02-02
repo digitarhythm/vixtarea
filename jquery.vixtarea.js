@@ -150,7 +150,6 @@
                         var val = elm.value;
                         var spc = "    ";
                         var addspc = spc.substr(tl.currLineText.length % 4);
-                        //elm.value = val.substr(0, pos) + '    ' + val.substr(pos, val.length);
                         setElementValue(this, val.substr(0, pos) + addspc + val.substr(pos, val.length));
                         elm.setSelectionRange(pos + (4 - tl.currLineText.length % 4), pos + (4 - tl.currLineText.length % 4));
                     }
@@ -160,8 +159,9 @@
                     break;
             }
 
+            //console.log("keyCode="+e.keyCode+", modifyCode="+modifyCode+", prevKey="+prevKey);
             // エスケープを押した
-            if ((e.keyCode == 27 && (mode == "edit" || mode == "command") && prevKey != 16) || e.keyCode == 219) {
+            if ((e.keyCode == 27 && prevKey != 16) || (prevKey == 17 && e.keyCode == 219) || (prevKey != 192 && prevKey != 16 && e.keyCode == 192) && (mode == "edit" || mode == "command")) {
                 modifyCode = 0;
                 switch (mode) {
                     case "edit":
@@ -191,6 +191,8 @@
                         break;
                 }
                 mode = "view";
+            } else {
+                prevKey = e.keyCode;
             }
         });
     
@@ -304,7 +306,7 @@
                                             }
                                         }
                                         var after = tl.currLineTextAll.substr(tl.currLineText.length);
-                                        var mtc = after.match(/(.*?)[\.,\/:;\'\"@\(\)\[\]\{\}|\<\>\-\ \n]/);
+                                        var mtc = after.match(/(.*?)[\.,\/:;\'\"@\(\)\[\]\{\}|\<\>\-\ \n\=]/);
                                         if (mtc != null) {
                                             var pos2 = pos + mtc[1].length;
                                             yankbuffer = val.substr(pos, mtc[1].length);
