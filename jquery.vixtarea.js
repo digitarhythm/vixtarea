@@ -465,10 +465,10 @@
                                             }
                                         }
                                         var after = tl.currLineTextAll.substr(tl.currLineText.length);
-                                        if ((mtc = after.match(/([.\s]+).+/)) != null) {
+                                        if ((mtc = after.match(/(\ {2,}).+/)) != null) {
                                             var pos2 = pos + mtc[1].length;
                                             yankbuffer = val.substr(pos, mtc[1].length);
-                                        } else if ((mtc = after.match(/(.*?)[\.,\/:;\'\"@\(\)\[\]\{\}|\<\>\-\n\=]/)) != null) {
+                                        } else if ((mtc = after.match(/(.*?)[\b\.,\/:;\'\"@\(\)\[\]\{\}|\<\>\-\n\=\ ]/)) != null) {
                                             var pos2 = pos + mtc[1].length;
                                             yankbuffer = val.substr(pos, mtc[1].length);
                                         } else {
