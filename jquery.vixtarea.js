@@ -157,6 +157,11 @@
                                     jQuery.Event( 'keypress', { keyCode: 120, which: 120 } )
                                 );
                                 break;
+                            case "joinline":
+                                jQuery(this).trigger(
+                                    jQuery.Event( 'keypress', { keyCode: 74, which: 74 } )
+                                );
+                                break;
                             case "change_word":
                                 var val = elm.value;
                                 if (++undopoint == MAXUNDO) {
@@ -700,7 +705,6 @@
                                 var pos2 = pos - tl.currLineText.length + tl.currLineTextAll.length;
                                 yankbuffer = val.substr(pos, tl.currLineTextAll.length - tl.currLineText.length);
                                 yankbuffermode = 1;
-                                //elm.value = val.substr(0, pos) + val.substr(pos2, val.length);
                                 setElementValue(this, val.substr(0, pos) + val.substr(pos2, val.length));
                                 elm.setSelectionRange(pos, pos);
                                 undobuffer[undopoint] = elm.value
@@ -724,7 +728,6 @@
                                 var pos2 = pos - tl.currLineText.length + tl.currLineTextAll.length;
                                 yankbuffer = val.substr(pos, tl.currLineTextAll.length - tl.currLineText.length);
                                 yankbuffermode = 1;
-                                //elm.value = val.substr(0, pos) + val.substr(pos2, val.length);
                                 setElementValue(this, val.substr(0, pos) + val.substr(pos2, val.length));
                                 elm.setSelectionRange(pos-1, pos-1);
                                 undobuffer[undopoint] = elm.value
@@ -748,7 +751,6 @@
                             case 112: // p
                                 lastcommand = "append_buffer";
                                 keybuffer = "";
-                                //e.preventDefault();
                                 if (++undopoint == MAXUNDO) {
                                     undopoint = 0;
                                 }
@@ -776,7 +778,6 @@
                             case 80: // P
                                 lastcommand = "insert_buffer";
                                 keybuffer = "";
-                                //e.preventDefault();
                                 if (++undopoint == MAXUNDO) {
                                     undopoint = 0;
                                 }
@@ -812,14 +813,15 @@
                                     }
                                 }
                                 var val = elm.value;
-                                //elm.value = val.substr(0, pos) + val.substr(pos + 1, val.length);
                                 setElementValue(this, val.substr(0, pos) + val.substr(pos + 1, val.length));
                                 elm.setSelectionRange(pos, pos);
                                 undobuffer[undopoint] = elm.value;
                                 modifyCode = 0;
                                 break;
 
-                            case 74: // J
+                            case 74: // J shift+j
+                                editstartpos = pos;
+                                lastcommand = "joinline";
                                 if (++undopoint == MAXUNDO) {
                                     undopoint = 0;
                                 }
@@ -831,7 +833,6 @@
                                 }
                                 var val = elm.value;
                                 var lineend = pos - tl.currLineText.length + tl.currLineTextAll.length;
-                                //elm.value = val.substr(0, lineend) + ' ' + val.substr(lineend + 1, val.length);
                                 setElementValue(this, val.substr(0, lineend) + ' ' + val.substr(lineend + 1, val.length));
                                 elm.setSelectionRange(lineend, lineend);
                                 undobuffer[undopoint] = elm.value;
@@ -845,7 +846,6 @@
                                     }
                                     var str = undobuffer[undopoint];
                                     if (str != undefined) {
-                                        //elm.value = str;
                                         setElementValue(this, str);
                                         elm.setSelectionRange(pos, pos);
                                     } else {
@@ -855,7 +855,6 @@
                                     }
                                 } else {
                                     var str = undobuffer[undopoint];
-                                    //elm.value = str;
                                     setElementValue(this, str);
                                     elm.setSelectionRange(pos, pos);
                                 }
@@ -867,7 +866,6 @@
                                     if (++undopoint == MAXUNDO) {
                                         undopoint = 0;
                                     }
-                                    //elm.value = undobuffer[undopoint];
                                     setElementValue(this, undobuffer[undopoint]);
                                     elm.setSelectionRange(pos, pos);
                                 }
