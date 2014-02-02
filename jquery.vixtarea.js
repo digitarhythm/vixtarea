@@ -184,6 +184,42 @@
                                 elm.setSelectionRange(pos, pos);
                                 undobuffer[undopoint] = elm.value
                                 break;
+                            case "delete_lineend":
+                                if (++undopoint == MAXUNDO) {
+                                    undopoint = 0;
+                                }
+                                undonew = undopoint;
+                                if (undopoint == undotop) {
+                                    if (++undotop == MAXUNDO) {
+                                        undotop = 0;
+                                    }
+                                }
+                                var val = elm.value;
+                                var pos2 = pos - tl.currLineText.length + tl.currLineTextAll.length;
+                                yankbuffer = val.substr(pos, tl.currLineTextAll.length - tl.currLineText.length);
+                                yankbuffermode = 1;
+                                setElementValue(this, val.substr(0, pos) + val.substr(pos2, val.length));
+                                elm.setSelectionRange(pos-1, pos-1);
+                                undobuffer[undopoint] = elm.value
+                                break;
+                            case "delete_edit_lineend":
+                                if (++undopoint == MAXUNDO) {
+                                    undopoint = 0;
+                                }
+                                undonew = undopoint;
+                                if (undopoint == undotop) {
+                                    if (++undotop == MAXUNDO) {
+                                        undotop = 0;
+                                    }
+                                }
+                                var val = elm.value;
+                                var pos2 = pos - tl.currLineText.length + tl.currLineTextAll.length;
+                                yankbuffer = val.substr(pos, tl.currLineTextAll.length - tl.currLineText.length);
+                                yankbuffermode = 1;
+                                setElementValue(this, val.substr(0, pos) + keybuffer + val.substr(pos2, val.length));
+                                elm.setSelectionRange(pos + keybuffer.length, pos + keybuffer.length);
+                                undobuffer[undopoint] = elm.value
+                                break;
                         }
                     }
                     if (prevKey == 17 && e.keyCode != 82) { // ctrl+!r
@@ -648,7 +684,9 @@
                                 modifyCode = 0;
                                 break;
 
-                            case 67: // C
+                            case 67: // C shift+c
+                                editstartpos = pos;
+                                lastcommand = "delete_edit_lineend";
                                 if (++undopoint == MAXUNDO) {
                                     undopoint = 0;
                                 }
@@ -670,7 +708,9 @@
                                 modifyCode = 0;
                                 break;
 
-                            case 68: // D
+                            case 68: // D shift+d
+                                editstartpos = pos;
+                                lastcommand = "delete_lineend";
                                 if (++undopoint == MAXUNDO) {
                                     undopoint = 0;
                                 }
