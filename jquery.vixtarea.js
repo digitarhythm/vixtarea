@@ -306,7 +306,7 @@
                                             }
                                         }
                                         var after = tl.currLineTextAll.substr(tl.currLineText.length);
-                                        var mtc = after.match(/(.*?)[\.,\/:;\'\"@\(\)\[\]\{\}|\<\>\-\ \n\=]/);
+                                        var mtc = after.match(/(.*?)[\.,\/:;\'\"@\(\)\[\]\{\}|\<\>\-\n\=]/);
                                         if (mtc != null) {
                                             var pos2 = pos + mtc[1].length;
                                             yankbuffer = val.substr(pos, mtc[1].length);
