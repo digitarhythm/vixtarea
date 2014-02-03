@@ -16,7 +16,7 @@
             return;
         }
 
-        var permitKeyCode = [46, 16, 186, 191, 60, 62, 65, 67, 87, 68, 79, 73, 88, 85, 90, 72, 74, 75, 76, 89, 71, 82, 52, 54, 80, 77, 222, 192, 69, 219];
+        var permitKeyCode = [27, 46, 16, 186, 191, 60, 62, 65, 67, 87, 68, 79, 73, 88, 85, 90, 72, 74, 75, 76, 89, 71, 82, 52, 54, 80, 77, 222, 192, 69, 219];
 
         var MAXUNDO = 256 + 1;
 
@@ -66,7 +66,8 @@
                 case "view":
                     var tl = getLineText(this);
                     permit = permitKeyCode.indexOf(e.keyCode);
-                    if (permit == -1 && modifyCode != 109 && modifyCode != 222 && lastcommand == "") {
+                    //if (permit == -1 && modifyCode != 109 && modifyCode != 222 && lastcommand == "") {
+                    if (permit == -1) {
                         //console.log("preventDefault:"+e.keyCode);
                         e.preventDefault();
                     }
@@ -168,7 +169,8 @@
 
             //console.log("keyCode="+e.keyCode+", modifyCode="+modifyCode+", prevKey="+prevKey);
             // エスケープを押した
-            if ((e.keyCode == 27 && prevKey != 16) || (prevKey == 17 && e.keyCode == 219) || (prevKey == 192 && prevKey != 16 && e.keyCode == 192) && (mode == "edit" || mode == "command")) {
+            if (((e.keyCode == 219 || e.keyCode == 27) && prevKey != 16) || (prevKey == 17 && e.keyCode == 219) || (prevKey == 192 && prevKey != 16 && e.keyCode == 192) && (mode == "edit" || mode == "command")) {
+                //console.log("ESC");
                 modifyCode = 0;
                 switch (mode) {
                     case "edit":
@@ -208,6 +210,7 @@
     
         // keypress ######################################################################################################
         this.keypress(function(e) {
+            //console.log("keyCode="+e.keyCode+", modifyCode="+modifyCode+", prevKey="+prevKey);
             //console.log("keypress="+e.keyCode);
             var elm = e.target;
             var pos = elm.selectionStart;
