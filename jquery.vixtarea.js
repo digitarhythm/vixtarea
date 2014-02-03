@@ -70,7 +70,6 @@
                     permit = permitKeyCode.indexOf(e.keyCode);
                     //console.log("keyCode="+e.keyCode+", modifyCode="+modifyCode+", prevKey="+prevKey);
                     if (permit == -1 && modifyCode != 109 && modifyCode != 222) {
-                        //console.log("preventDefault");
                         e.preventDefault();
                     }
 
@@ -193,10 +192,10 @@
                                     }
                                 }
                                 var after = tl.currLineTextAll.substr(tl.currLineText.length);
-                                if ((mtc = after.match(/([.\s]+).+/)) != null) {
+                                if ((mtc = after.match(/(\ {2,}).+/)) != null) {
                                     var pos2 = pos + mtc[1].length;
                                     yankbuffer = val.substr(pos, mtc[1].length);
-                                } else if ((mtc = after.match(/(.*?)[\.,\/:;\'\"@\(\)\[\]\{\}|\<\>\-\n\=]/)) != null) {
+                                } else if ((mtc = after.match(/(.*?)[\b\.,\/:;\'\"@\(\)\[\]\{\}|\<\>\-\n\=\ ]/)) != null) {
                                     var pos2 = pos + mtc[1].length;
                                     yankbuffer = val.substr(pos, mtc[1].length);
                                 } else {
@@ -248,6 +247,7 @@
                                 break;
                         }
                     }
+                    
 
                     //if (prevKey == 16 && e.keyCode == 86) {
                     //    visualmode = 1;
@@ -256,7 +256,6 @@
 
                     if (prevKey == 17 && e.keyCode != 82) { // ctrl+!r
                         e.preventDefault();
-                        prevKey = 17;
                         switch (e.keyCode) {
                             case 68: // ctrl+d
                                 var jump = pos - tl.currLineText.length;
@@ -318,6 +317,7 @@
                                 break;
 
                         }
+                        prevKey = 17;
                     } else {
                         prevKey = e.keyCode;
                     }
@@ -326,6 +326,7 @@
 
                 // 編集モード ##############################################################
                 case "edit":
+                    prevKey = e.keyCode;
                     if (e.keyCode === 9) { // TAB
                         e.preventDefault();
                         var tl = getLineText(this);
@@ -344,7 +345,7 @@
 
             //console.log("keyCode="+e.keyCode+", modifyCode="+modifyCode+", prevKey="+prevKey);
             // エスケープを押した
-            if ((e.keyCode == 27 && prevKey != 16) || (prevKey == 17 && e.keyCode == 219) || (prevKey != 192 && prevKey != 16 && e.keyCode == 192) && (mode == "edit" || mode == "command")) {
+            if ((e.keyCode == 27 && prevKey != 16) || (prevKey == 219 && e.keyCode == 219) || (prevKey == 192 && prevKey != 16 && e.keyCode == 192) && (mode == "edit" || mode == "command")) {
                 modifyCode = 0;
                 switch (mode) {
                     case "edit":
@@ -375,8 +376,8 @@
                         break;
                 }
                 mode = "view";
-            } else {
-                prevKey = e.keyCode;
+            //} else {
+            //    prevKey = e.keyCode;
             }
         });
     
