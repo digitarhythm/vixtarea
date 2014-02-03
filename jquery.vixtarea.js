@@ -53,8 +53,6 @@
         this.keyup(function(e) {
             if (prevKey == 17 && e.keyCode == 17) {
                 prevKey = 0;
-            } else if (prevKey == 17) {
-                prevKey = 17;
             }
             //console.log("prevKey="+prevKey+", keyup:"+e.keyCode);
         });
@@ -315,9 +313,7 @@
                                 jQuery(this).scrollTop(startPos);
                                 modifyCode = 0;
                                 break;
-
                         }
-                        prevKey = 17;
                     } else {
                         prevKey = e.keyCode;
                     }
@@ -326,7 +322,7 @@
 
                 // 編集モード ##############################################################
                 case "edit":
-                    prevKey = e.keyCode;
+                    //prevKey = e.keyCode;
                     if (e.keyCode === 9) { // TAB
                         e.preventDefault();
                         var tl = getLineText(this);
@@ -345,7 +341,7 @@
 
             //console.log("keyCode="+e.keyCode+", modifyCode="+modifyCode+", prevKey="+prevKey);
             // エスケープを押した
-            if ((e.keyCode == 27 && prevKey != 16) || (prevKey == 219 && e.keyCode == 219) || (prevKey == 192 && prevKey != 16 && e.keyCode == 192) && (mode == "edit" || mode == "command")) {
+            if ((e.keyCode == 27 && prevKey != 16) || (prevKey == 17 && e.keyCode == 219) || (prevKey == 192 && prevKey != 16 && e.keyCode == 192) && (mode == "edit" || mode == "command")) {
                 modifyCode = 0;
                 switch (mode) {
                     case "edit":
@@ -376,8 +372,10 @@
                         break;
                 }
                 mode = "view";
-            //} else {
-            //    prevKey = e.keyCode;
+            } else {
+                if (prevKey != 17) {
+                    prevKey = e.keyCode;
+                }
             }
         });
     
