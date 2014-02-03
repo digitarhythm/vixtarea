@@ -67,7 +67,7 @@
                     var tl = getLineText(this);
                     permit = permitKeyCode.indexOf(e.keyCode);
                     //console.log("keyCode="+e.keyCode+", modifyCode="+modifyCode+", prevKey="+prevKey);
-                    if (permit == -1 && modifyCode != 109 && modifyCode != 222) {
+                    if (permit == -1 && modifyCode != 109 && modifyCode != 222 && lastcommand == "") {
                         e.preventDefault();
                     }
 
