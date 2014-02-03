@@ -842,19 +842,23 @@
                             case 120: // x
                                 lastcommand = "delete_character";
                                 keybuffer = "";
-                                if (++undopoint == MAXUNDO) {
-                                    undopoint = 0;
-                                }
-                                undonew = undopoint;
-                                if (undopoint == undotop) {
-                                    if (++undotop == MAXUNDO) {
-                                        undotop = 0;
-                                    }
-                                }
                                 var val = elm.value;
-                                setElementValue(this, val.substr(0, pos) + val.substr(pos + 1, val.length));
-                                elm.setSelectionRange(pos, pos);
-                                undobuffer[undopoint] = elm.value;
+                                ch = val.substr(pos, 1);
+                                code = ch.charCodeAt(0);
+                                if (code != 10) {
+                                    if (++undopoint == MAXUNDO) {
+                                        undopoint = 0;
+                                    }
+                                    undonew = undopoint;
+                                    if (undopoint == undotop) {
+                                        if (++undotop == MAXUNDO) {
+                                            undotop = 0;
+                                        }
+                                    }
+                                    setElementValue(this, val.substr(0, pos) + val.substr(pos + 1, val.length));
+                                    elm.setSelectionRange(pos, pos);
+                                    undobuffer[undopoint] = elm.value;
+                                }
                                 modifyCode = 0;
                                 break;
 
