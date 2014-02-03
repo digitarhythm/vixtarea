@@ -16,7 +16,7 @@
             return;
         }
 
-        var permitKeyCode = [27, 46, 16, 186, 191, 60, 62, 65, 67, 87, 68, 79, 73, 88, 85, 90, 72, 74, 75, 76, 89, 71, 82, 52, 54, 80, 77, 222, 192, 69, 219];
+        var permitKeyCode = [27, 46, 16, 186, 191, 60, 62, 65, 67, 87, 68, 79, 73, 88, 85, 90, 72, 74, 75, 76, 89, 71, 82, 52, 54, 80, 77, 222, 192, 69, 219, 190];
 
         var MAXUNDO = 256 + 1;
 
@@ -79,6 +79,7 @@
 
                     //console.log("keyCode="+e.keyCode+", modifyCode="+modifyCode+", prevKey="+prevKey);
                     if (prevKey == 17 && e.keyCode != 82) { // ctrl+!r
+                        //console.log("keyCode="+e.keyCode);
                         e.preventDefault();
                         switch (e.keyCode) {
                             case 68: // ctrl+d
