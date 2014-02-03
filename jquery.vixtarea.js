@@ -649,6 +649,7 @@
 
                             case 36: // shift+4
                                 tl = getLineText(this);
+                                horizontal = tl.currLineTextAll.length;
                                 var nl = pos + tl.currLineTextAll.length - tl.currLineText.length;
                                 elm.setSelectionRange(nl - 1, nl - 1);
                                 modifyCode = 0;
@@ -656,6 +657,7 @@
 
                             case 94: // shift+6
                                 tl = getLineText(this);
+                                horizontal = 0;
                                 var nl = pos - tl.currLineText.length;
                                 elm.setSelectionRange(nl, nl);
                                 modifyCode = 0;
