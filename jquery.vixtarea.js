@@ -73,10 +73,13 @@
                         //console.log("preventDefault");
                         e.preventDefault();
                     }
+
                     if (e.keyCode == 222) { // '
                         modifyCode = e.keyCode;
                         e.preventDefault();
                     }
+
+                    // period operation
                     if (e.keyCode == 190) {
                         switch (lastcommand) {
                             case "delete_line":
@@ -85,6 +88,7 @@
                                     jQuery.Event( 'keypress', { keyCode: 100, which: 100 } )
                                 );
                                 break;
+
                             case "insert_string":
                                 if (++undopoint == MAXUNDO) {
                                     undopoint = 0;
@@ -100,6 +104,7 @@
                                 elm.setSelectionRange(pos + keybuffer.length, pos + keybuffer.length);
                                 undobuffer[undopoint] = elm.value;
                                 break;
+
                             case "append_string":
                                 if (++undopoint == MAXUNDO) {
                                     undopoint = 0;
@@ -115,6 +120,14 @@
                                 elm.setSelectionRange(pos + keybuffer.length, pos + keybuffer.length);
                                 undobuffer[undopoint] = elm.value;
                                 break;
+
+                            case "append_string_top":
+                                var addpos = pos - tl.currLineText.length;
+                                var val = elm.value;
+                                setElementValue(this, val.substr(0, addpos) + keybuffer + val.substr(addpos, val.length));
+                                elm.setSelectionRange(addpos, addpos);
+                                break;
+
                             case "append_line":
                                 if (++undopoint == MAXUNDO) {
                                     undopoint = 0;
@@ -136,32 +149,38 @@
                                 elm.setSelectionRange(nl, nl);
                                 undobuffer[undopoint] = elm.value;
                                 break;
+
                             case "insert_line":
                                 var nl = pos - tl.currLineText.length;
                                 var val = elm.value;
                                 setElementValue(this, val.substr(0, nl) + keybuffer + '\n' + val.substr(nl, val.length));
                                 elm.setSelectionRange(nl, nl);
                                 break;
+
                             case "append_buffer":
                                 jQuery(this).trigger(
                                     jQuery.Event( 'keypress', { keyCode: 112, which: 112 } )
                                 );
                                 break;
+
                             case "insert_buffer":
                                 jQuery(this).trigger(
                                     jQuery.Event( 'keypress', { keyCode: 80, which: 80 } )
                                 );
                                 break;
+
                             case "delete_character":
                                 jQuery(this).trigger(
                                     jQuery.Event( 'keypress', { keyCode: 120, which: 120 } )
                                 );
                                 break;
+
                             case "joinline":
                                 jQuery(this).trigger(
                                     jQuery.Event( 'keypress', { keyCode: 74, which: 74 } )
                                 );
                                 break;
+
                             case "change_word":
                                 var val = elm.value;
                                 if (++undopoint == MAXUNDO) {
@@ -189,6 +208,7 @@
                                 elm.setSelectionRange(pos, pos);
                                 undobuffer[undopoint] = elm.value
                                 break;
+
                             case "delete_lineend":
                                 if (++undopoint == MAXUNDO) {
                                     undopoint = 0;
@@ -207,6 +227,7 @@
                                 elm.setSelectionRange(pos-1, pos-1);
                                 undobuffer[undopoint] = elm.value
                                 break;
+
                             case "delete_edit_lineend":
                                 if (++undopoint == MAXUNDO) {
                                     undopoint = 0;
@@ -227,6 +248,12 @@
                                 break;
                         }
                     }
+
+                    //if (prevKey == 16 && e.keyCode == 86) {
+                    //    visualmode = 1;
+                    //    selectstart = pos;
+                    //}
+
                     if (prevKey == 17 && e.keyCode != 82) { // ctrl+!r
                         e.preventDefault();
                         prevKey = 17;
@@ -294,6 +321,7 @@
                     } else {
                         prevKey = e.keyCode;
                     }
+
                     break;
 
                 // 編集モード ##############################################################
@@ -646,6 +674,16 @@
                                 lastcommand = "insert_string";
                                 keybuffer = "";
                                 editstartpos = pos;
+                                modifyCode = 0;
+                                break;
+
+                            case 65: // A
+                                mode = "edit";
+                                lastcommand = "append_string_top";
+                                keybuffer = "";
+                                var addpos = pos - tl.currLineText.length;
+                                elm.setSelectionRange(addpos, addpos);
+                                editstartpos = addpos;
                                 modifyCode = 0;
                                 break;
 
