@@ -16,7 +16,7 @@
             return;
         }
 
-        var permitKeyCode = [27, 46, 16, 186, 191, 60, 62, 65, 67, 87, 68, 79, 73, 88, 85, 90, 72, 74, 75, 76, 89, 71, 82, 52, 54, 80, 77, 222, 192, 69, 219, 190];
+        var permitKeyCode = [188, 27, 46, 16, 186, 191, 60, 62, 65, 67, 87, 68, 79, 73, 88, 85, 90, 72, 74, 75, 76, 89, 71, 82, 52, 54, 80, 77, 222, 192, 69, 219, 190];
 
         var MAXUNDO = 256 + 1;
 
@@ -67,7 +67,7 @@
                     var tl = getLineText(this);
                     permit = permitKeyCode.indexOf(e.keyCode);
                     //if (permit == -1 && modifyCode != 109 && modifyCode != 222 && lastcommand == "") {
-                    if (permit == -1) {
+                    if (permit == -1 && prevKey != 82) {
                         //console.log("preventDefault:"+e.keyCode);
                         e.preventDefault();
                     }
@@ -225,6 +225,7 @@
                     break;
                 case "view":
                     var tl = getLineText(this);
+
                     if (modifyCode != 114) { // r
                         e.preventDefault();
                     }
@@ -241,10 +242,11 @@
                                     undotop = 0;
                                 }
                             }
-
+                            lastcommand = "replace_character"
                             var val = elm.value;
                             yankbuffer = val.substr(pos, 1);
                             yankbuffermode = 1;
+                            keyBuffer = String.fromCharCode(e.keyCode);
                             setElementValue(this, val.substr(0, pos) + String.fromCharCode(e.keyCode) + val.substr(pos + 1));
                             elm.setSelectionRange(pos, pos);
                             undobuffer[undopoint] = elm.value
@@ -389,6 +391,24 @@
                         switch (e.keyCode) {
                             case 46: // .
                                 switch (lastcommand) {
+                                    case "replace_character":
+                                        if (++undopoint == MAXUNDO) {
+                                            undopoint = 0;
+                                        }
+                                        undonew = undopoint;
+                                        if (undopoint == undotop) {
+                                            if (++undotop == MAXUNDO) {
+                                                undotop = 0;
+                                            }
+                                        }
+                                        var val = elm.value;
+                                        yankbuffer = val.substr(pos, 1);
+                                        yankbuffermode = 1;
+                                        setElementValue(this, val.substr(0, pos) + keyBuffer + val.substr(pos + 1));
+                                        elm.setSelectionRange(pos, pos);
+                                        undobuffer[undopoint] = elm.value
+                                        break;
+
                                     case "delete_line":
                                         modifyCode = 100;
                                         jQuery(this).trigger(
