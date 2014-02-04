@@ -170,7 +170,7 @@
 
             //console.log("keyCode="+e.keyCode+", modifyCode="+modifyCode+", prevKey="+prevKey);
             // エスケープを押した
-            if (((e.keyCode == 219 || e.keyCode == 27) && prevKey != 16) || (prevKey == 17 && e.keyCode == 219) || (prevKey == 192 && prevKey != 16 && e.keyCode == 192) && (mode == "edit" || mode == "command")) {
+            if (e.keyCode == 27 || (prevKey == 17 && e.keyCode == 219) || (prevKey == 192 && prevKey != 16 && e.keyCode == 192) && (mode == "edit" || mode == "command")) {
                 //console.log("ESC");
                 modifyCode = 0;
                 switch (mode) {
