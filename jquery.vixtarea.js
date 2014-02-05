@@ -16,7 +16,7 @@
             return;
         }
 
-        var permitKeyCode = [188, 27, 46, 16, 186, 191, 60, 62, 65, 67, 87, 68, 79, 73, 88, 85, 90, 72, 74, 75, 76, 89, 71, 82, 52, 54, 80, 77, 222, 192, 69, 219, 190];
+        var permitKeyCode = [122, 188, 27, 46, 16, 186, 191, 60, 62, 65, 67, 87, 68, 79, 73, 88, 85, 90, 72, 74, 75, 76, 89, 71, 82, 52, 54, 80, 77, 222, 192, 69, 219, 190];
 
         var MAXUNDO = 256 + 1;
 
@@ -270,6 +270,16 @@
                             e.keyCode = 0;
                         } else {
                             switch (e.keyCode) {
+                                case 122: // zz
+                                    modifyCode = 0;
+                                    startLine = tl.currLine - parseInt(vline / 2);
+                                    if (startLine < 0) {
+                                        startLine = 0;
+                                    }
+                                    var startPos = startLine * parseFloat(jQuery(this).css("line-height"));
+                                    jQuery(this).scrollTop(startPos);
+                                    break;
+
                                 case 62: // >
                                     lastcommand = "indent_increment";
                                     keybuffer = "";
@@ -625,7 +635,7 @@
                             case 99:  // c
                                 modifyCode = e.keyCode;
                                 break;
-                            case 114: //r
+                            case 114: // r
                                 modifyCode = e.keyCode;
                                 break;
                             case 109: // m
@@ -635,6 +645,9 @@
                                 modifyCode = e.keyCode;
                                 break;
                             case 62: // >
+                                modifyCode = e.keyCode;
+                                break;
+                            case 122: // z
                                 modifyCode = e.keyCode;
                                 break;
 
@@ -872,20 +885,6 @@
                                 elm.setSelectionRange(pos-1, pos-1);
                                 undobuffer[undopoint] = elm.value
                                 modifyCode = 0;
-                                break;
-
-                            case 122: // zz
-                                if (modifyCode == 122) {
-                                    modifyCode = 0;
-                                    var currPos = tl.currLine - parseInt(vline / 2);
-                                    if (currPos < 0) {
-                                        currPos = 0;
-                                    }
-                                    var startPos = currPos * parseFloat(jQuery(this).css("line-height"));
-                                    jQuery(this).scrollTop(startPos);
-                                } else {
-                                    modifyCode = e.keyCode;
-                                }
                                 break;
 
                             case 112: // p
